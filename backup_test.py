@@ -34,22 +34,18 @@ class BackupTests(unittest.TestCase):
         os.remove(output_file_path)
 
     def test_backup(self):
+        output_dir_path = self.test_dir_path
         # input_path doesn't exist
         self.assertRaises(
             IOError,
-            lambda: backup('does_not_exist')
+            lambda: backup('does_not_exist', output_dir_path)
         )
         # output_dir_path doesn't exist
         self.assertRaises(
             IOError,
             lambda: backup(self.test_dir_path, 'does_not_exist')
         )
-        # Check default output dir
-        backup_file_path = backup(self.test_dir_path)
-        self.assertTrue(os.path.exists(backup_file_path))
-        os.remove(backup_file_path)
         # Check specified output dir
-        output_dir = os.path.join(self.test_dir_path)
-        backup_file_path = backup(self.test_dir_path, output_dir)
+        backup_file_path = backup(self.test_dir_path, output_dir_path)
         self.assertTrue(os.path.exists(backup_file_path))
         os.remove(backup_file_path)

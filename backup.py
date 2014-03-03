@@ -30,18 +30,20 @@ def command_line_backup(args):
             if index + 1 == len(args):
                 raise ArgumentException("Missing input directory path after '{}'".format(arg))
             elif arg == '-i':
-                input_path = args[index+1]
+                input_path = os.path.abspath(args[index+1])
             elif arg == '-o':
-                output_dir_path = args[index+1]
+                output_dir_path = os.path.abspath(args[index+1])
     if input_path is None:
         raise ArgumentException("You must specify directory/file to back up (-i)")
+    if output_dir_path is None:
+        output_dir_path = os.path.dirname(input_path)
     print "Backing up {} to {}...".format(input_path, output_dir_path)
     output_file_path = backup(input_path, output_dir_path)
-    print "Complete."
+    print "Output to {} complete.".format(output_file_path)
     return output_file_path
 
 
-def backup(input_path, output_dir_path=None):
+def backup(input_path, output_dir_path):
     """
     Creates a timestamped zipped copy of the file/directory with the given input_path in the directory with the given
         output_dir_path
