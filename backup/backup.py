@@ -1,4 +1,7 @@
-"""This utility creates a time_stamped file/directory specified by '-i' to the directory specified by '-o'"""
+"""
+This utility creates a time stamped zip backup of the file/directory
+specified by '-i' to the directory specified by'-o'
+"""
 __author__ = 'Dwight Trollinger'
 
 
@@ -6,6 +9,7 @@ import sys
 import zipfile
 import os
 import datetime
+import file_sys_manip
 
 
 def main(args):
@@ -32,8 +36,9 @@ def command_line_backup(args):
     if input_path is None:
         raise ArgumentException("You must specify directory/file to back up (-i)")
     print "Backing up {} to {}...".format(input_path, output_dir_path)
-    backup(input_path, output_dir_path)
+    output_file_path = backup(input_path, output_dir_path)
     print "Complete."
+    return output_file_path
 
 
 def backup(input_path, output_dir_path=None):
@@ -46,9 +51,11 @@ def backup(input_path, output_dir_path=None):
     @type output_dir_path: str
     @param output_dir_path: the path of the directory to place to backup in
     """
+    if not os.path.exists(input_path):
+        raise IOError("{} does not exist.".format(input_path))
     # Default output to the parent directory of input
     if output_dir_path is None:
-        output_dir_path == os.path.dirname(input_path)
+        output_dir_path = os.path.dirname(input_path)
 
     # Get the time stamp
     now = datetime.datetime.now()
@@ -56,16 +63,15 @@ def backup(input_path, output_dir_path=None):
     time_stamp = [str(entry) for entry in time_stamp]
     time_stamp = '_'.join(time_stamp)
     output_file_name = os.path.basename(input_path) + '_' + time_stamp
-    output_file_path = os.path.join(output_dir_path, output_file_name)
-    with zipfile.ZipFile(output_file_path, 'w+', zipfile.ZIP_DEFLATED) as z:
-        if os.path.isdir(input_path):
-            for root, dirs, files in os.walk(output_dir_path):
-                for f in files:
-                    z.write(os.path.join(root, f))
-        elif os.path.isfile(input_path):
+    output_file_path = os.path.join(output_dir_path, output_file_name) + '.zip'
+    if os.path.isdir(input_path):
+        file_sys_manip.zip_dir(input_path, output_file_path)
+    elif os.path.isfile(input_path):
+        with zipfile.ZipFile(output_file_path, 'w+', zipfile.ZIP_DEFLATED) as z:
             z.write(input_path)
-        else:
-            raise ArgumentException("{} does not exist".format(input_path))
+    else:
+        raise ArgumentException("{} does not exist".format(input_path))
+    return output_file_path
 
 
 class ArgumentException(Exception):
