@@ -45,7 +45,13 @@ class BackupTests(unittest.TestCase):
             IOError,
             lambda: backup(self.test_dir_path, 'does_not_exist')
         )
-        # Check specified output dir
+        # Backup a directory
         backup_file_path = backup(self.test_dir_path, output_dir_path)
+        self.assertTrue(os.path.exists(backup_file_path))
+        os.remove(backup_file_path)
+        # Backup a file
+        file_path = file_sys_manip.generate_unique_path(os.path.join(self.test_dir_path, "will_be_backed_up"))
+        file_sys_manip.touch(file_path)
+        backup_file_path = backup(file_path, output_dir_path)
         self.assertTrue(os.path.exists(backup_file_path))
         os.remove(backup_file_path)

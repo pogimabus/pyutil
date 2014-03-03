@@ -149,6 +149,13 @@ def remove_files(file_paths, parent_dir=None):
 
 
 def zip_dir(input_dir_path, output_file_path):
+    """
+    Zips the given directory and all contents up and outputs the result to output_file_path
+    @type input_dir_path: str
+    @param input_dir_path: the path to the directory to be zipped up
+    @type output_file_path: str
+    @param output_file_path: the desired path of the output zip file
+    """
     if not os.path.isdir(input_dir_path):
         raise DirectoryError("{} is not a directory")
     with zipfile.ZipFile(output_file_path, 'w', zipfile.ZIP_DEFLATED) as z:

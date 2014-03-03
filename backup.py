@@ -37,7 +37,7 @@ def command_line_backup(args):
         raise ArgumentException("You must specify directory/file to back up (-i)")
     if output_dir_path is None:
         output_dir_path = os.path.dirname(input_path)
-    print "Backing up {} to {}...".format(input_path, output_dir_path)
+    print "Backing up {} to {} ...".format(input_path, output_dir_path)
     output_file_path = backup(input_path, output_dir_path)
     print "Output to {} complete.".format(output_file_path)
     return output_file_path
@@ -52,6 +52,7 @@ def backup(input_path, output_dir_path):
     @param input_path: the path of the file/directory to back up
     @type output_dir_path: str
     @param output_dir_path: the path of the directory to place to backup in
+    @return: the path the the created backup file
     """
     if not os.path.exists(input_path):
         raise IOError("{} does not exist.".format(input_path))
@@ -69,7 +70,7 @@ def backup(input_path, output_dir_path):
     if os.path.isdir(input_path):
         file_sys_manip.zip_dir(input_path, output_file_path)
     elif os.path.isfile(input_path):
-        with zipfile.ZipFile(output_file_path, 'w+', zipfile.ZIP_DEFLATED) as z:
+        with zipfile.ZipFile(output_file_path, 'w', zipfile.ZIP_DEFLATED) as z:
             z.write(input_path)
     else:
         raise ArgumentException("{} does not exist".format(input_path))
