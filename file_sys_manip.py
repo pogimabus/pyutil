@@ -11,11 +11,23 @@ file_line_list_cache_lowered = {}
 
 
 def touch(path):
+    """
+    Implements the Unix style 'touch' command
+    :param path: path of the file to 'touch'
+    :return: A file with the given path will exist and will have its 'modified' time stamp updated to the current time
+    """
     with open(path, 'a'):
         os.utime(path, None)
 
 
 def get_file_line_list_from_cache(file_path, lowered=False):
+    """
+    Returns a list of text lines corresponding to the state of the given file the last time it was read by this
+    function. If the file has never been read, it will be cached.
+    :param file_path: the path to the file whose contents shall be retrieved
+    :param lowered: if true, all text in the returned lines will be lower-case
+    :return: a list of text lines corresponding to the state of the given file
+    """
     if lowered:
         if file_path not in file_line_list_cache_lowered:
             with open(file_path, 'r') as f:
@@ -31,15 +43,21 @@ def get_file_line_list_from_cache(file_path, lowered=False):
     return line_list
 
 
-def generate_unique_path(base_path, parent_dir=None):
+def generate_unique_path(base_file_name, parent_dir=None):
+    """
+    Returns an available (not in use) path
+    :param base_file_name: base file name to be used in generating the path
+    :param parent_dir: parent directory of the desired path
+    :return: an available (not in use) path
+    """
     if parent_dir is None:
         parent_dir = os.getcwd()
-    base_path = os.path.join(parent_dir, base_path)
-    if not os.path.exists(base_path):
-        unique_path = base_path
+    base_file_name = os.path.join(parent_dir, base_file_name)
+    if not os.path.exists(base_file_name):
+        unique_path = base_file_name
     else:
         count = 0
-        base_path_name, base_path_extension = os.path.splitext(base_path)
+        base_path_name, base_path_extension = os.path.splitext(base_file_name)
         while True:
             count += 1
             unique_path = "{}_{}{}".format(base_path_name, count, base_path_extension)
@@ -52,13 +70,13 @@ def generate_unique_path(base_path, parent_dir=None):
 def get_file_paths(dir_paths, extensions=None, excluded_dir_paths=None):
     """
     Returns the set of every file path in the specified directory trees which has one of the given extensions
-    @type dir_paths: str or set
-    @param dir_paths: set of directory paths to search
-    @type extensions: set
-    @param extensions: set of extensions file paths will be checked against
-    @type excluded_dir_paths: unknown or str or dict or set
-    @param excluded_dir_paths: set of directory paths to exclude from the search
-    @return: the set of every file path in the specified directory trees
+    :type dir_paths: str or set
+    :param dir_paths: set of directory paths to search
+    :type extensions: set
+    :param extensions: set of extensions file paths will be checked against
+    :type excluded_dir_paths: unknown or str or dict or set
+    :param excluded_dir_paths: set of directory paths to exclude from the search
+    :return: the set of every file path in the specified directory trees
     """
     if isinstance(dir_paths, str):
         dir_paths = {dir_paths}
@@ -76,7 +94,31 @@ def get_file_paths(dir_paths, extensions=None, excluded_dir_paths=None):
     return paths
 
 
+def get_root_dir(path):
+    """
+    Returns the 'root' directory of the given path
+    :param path: The path the extract the root directory from
+    :return: the 'root' directory of the given path
+    """
+    path = [path]
+    result = None
+    while True:
+        if path[0].endswith('\\'):
+            path = os.path.split(path[0])
+        path = os.path.split(path[0])
+        if path[0] == '':
+            result = path[1]
+            break
+        if path[1] == '':
+            result = path[0]
+            break
+    return result
+
+
 class FileCreator(object):
+    """
+    File Creation Management Class
+    """
 
     def __init__(self):
         self.files_created = []
@@ -90,12 +132,12 @@ class FileCreator(object):
     def create_unique_file(self, base_name=None, dir_path=None):
         """
         Creates a uniquely named file in the given directory path
-        @type base_name: str
-        @param base_name: the base name of the file we want to create
-        @type dir_path: str
-        @param dir_path: the path to the directory where the file shall be created
-        @rtype str
-        @return: the path of the newly created file
+        :type base_name: str
+        :param base_name: the base name of the file we want to create
+        :type dir_path: str
+        :param dir_path: the path to the directory where the file shall be created
+        :rtype str
+        :return: the path of the newly created file
         """
         if dir_path is None:
             dir_path = os.getcwd()
@@ -112,10 +154,10 @@ class FileCreator(object):
     def create_files_from_dict(self, file_dict, dir_path=None):
         """
         Creates files based on a file_dict.
-        @type file_dict: dict
-        @param file_dict: dict of the form { file_path_str: file_contents_str }
-        @param dir_path: Directory path which relative file_path_str will be based upon
-        @return: None
+        :type file_dict: dict
+        :param file_dict: dict of the form { file_path_str: file_contents_str }
+        :param dir_path: Directory path which relative file_path_str will be based upon
+        :return: None
         """
         if dir_path is None:
             dir_path = os.getcwd()
@@ -136,8 +178,8 @@ class FileCreator(object):
 def remove_files(file_paths, parent_dir=None):
     """
     Deletes the files specified by file_paths
-    @param file_paths: paths of the files that will be deleted
-    @return: None
+    :param file_paths: paths of the files that will be deleted
+    :return: None
     """
     if parent_dir is None:
         parent_dir = os.getcwd()
@@ -151,10 +193,10 @@ def remove_files(file_paths, parent_dir=None):
 def zip_dir(input_dir_path, output_file_path):
     """
     Zips the given directory and all contents up and outputs the result to output_file_path
-    @type input_dir_path: str
-    @param input_dir_path: the path to the directory to be zipped up
-    @type output_file_path: str
-    @param output_file_path: the desired path of the output zip file
+    :type input_dir_path: str
+    :param input_dir_path: the path to the directory to be zipped up
+    :type output_file_path: str
+    :param output_file_path: the desired path of the output zip file
     """
     if not os.path.isdir(input_dir_path):
         raise DirectoryError("{} is not a directory")
@@ -172,9 +214,9 @@ class FileAlreadyExists(Exception):
     pass
 
 
-#--------------------
+########
 # Tests
-#--------------------
+########
 class FileCreatorTests(unittest.TestCase):
 
     def setUp(self):
@@ -252,6 +294,18 @@ class FileSysManipTests(unittest.TestCase):
 
     def tearDown(self):
         shutil.rmtree(self.test_dir)
+
+    def test_get_root_dir(self):
+        root_dir = get_root_dir(r'C:\some\path')
+        self.assertEqual(root_dir, 'C:\\')
+        root_dir = get_root_dir('C:\\some\\path\\')
+        self.assertEqual(root_dir, 'C:\\')
+        root_dir = get_root_dir(r'some\other\path')
+        self.assertEqual(root_dir, 'some')
+        root_dir = get_root_dir(r'\some')
+        self.assertEqual(root_dir, '\\')
+        root_dir = get_root_dir(r'some')
+        self.assertEqual(root_dir, 'some')
 
     def test_get_file_line_list_from_cache(self):
         base_test_file_name = "test_get_file_line_list_from_cache.txt"
